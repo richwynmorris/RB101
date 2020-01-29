@@ -1,0 +1,46 @@
+# Practise Problem 1
+# The return value of the method is [1,2,3] as the method last item in the methods block
+# , 'hi', is considered a truthy. Therefore, the method returns the array unaltered.
+
+# Practise Problem 2 
+# The return value will be 2 as the count method counts the number of elements 
+# that meet the conditions set out in the block as true. To find out how the count method works, 
+# you can use the Ruby documentation to help you. 
+
+# Practise Problem 3 
+# The reject method will return items in an array that are NOT true and output them to a new array.
+# The return value on the method will be []. EDIT This is not the outcome as predicted as the puts 
+# statement is 'nil' meaning the items in the array will meet the requirements of the method and 
+# print the array, [1,2,3].
+
+# Practise Problem 4
+# The each_with_object method assigns the value's first index value and use's this as the hash key.
+# The key is then assigned the value from the original array. {'a'=>"ant"}
+
+# Practise Problem 5
+# The shift method used in relation to a hash object, removes the first key, value pair from the hash 
+# and returns it as an array. You can find this out by looking at the Ruby documentaiton. 
+
+# Practise Problem 6
+# The pop method is invoked on the array, returning the object 'caterpillar'. The method size is then invoked
+# on the return value of the string 'caterpillar' which returns the character length of the word. This is 11.
+
+# Practise Problem 7 
+# The method's returned statement, true or false, is based on the last expression invoked in the method (num,odd?).
+# This evaluates to true so the puts method is invoked and returns 1. The any? method does not continue to 
+# iterate after this point. 
+
+# Practise Problem 8 
+# The .take method returns the first number of items requested from the array using open paranthesis. 
+# This method is non destructive.
+
+# Practise Problem 9
+# issuing the .map method on a Hash will return an array. The .map method will iterate through 
+# eack key value pair asign either true or false based on the condition. As the first value's characters
+# are not greater than 3, this is return as false in the array. The second value in the hash, does return
+# as true and as the if method dictates, the value is returned and added to the array.
+
+# Practise Problem 10
+# The method returns the values [1, nil, nil] as the first number from the array does not meet 
+# the if condition and is returned. The second and third value do. However, the puts statement that
+# follows the condition turns the value to 'nil' as puts equates to a falsey. 
