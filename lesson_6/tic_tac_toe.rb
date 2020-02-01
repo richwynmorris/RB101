@@ -29,7 +29,6 @@ end
 # rubocop:disable Metics/AbcSize
 def display_board(brd)
   system 'clear'
-  intro
   puts ""
   puts "     |     |"
   puts "  #{brd[1]}  |  #{brd[2]}  |  #{brd[3]}"
@@ -46,6 +45,17 @@ def display_board(brd)
 end
 # rubocop:enable Metics/AbcSize
 
+def joinor(arr, div=', ', word='or ')
+  if arr.length < 2
+     arr
+  elsif arr.length == 2
+        arr.join('or ' || "#{word}")
+  else
+    arr[-1] = "#{word}" + "#{arr.last}."
+    arr.join(div)
+  end
+end
+
 def initialize_board
   new_board = {}
   (1..9).each { |num| new_board[num] = INITIAL_MARKER }
@@ -60,7 +70,7 @@ def player_places_pieces(brd)
   answer = ''
 
   loop do
-    prompt "Choose a square, (#{empty_spaces(brd).join(', ')})"
+    prompt "Choose a square, (#{joinor(empty_spaces(brd))})"
     answer = gets.chomp.to_i
     break if empty_spaces(brd).include?(answer)
     prompt "Sorry, that's not a valid choice."
