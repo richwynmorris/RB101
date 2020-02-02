@@ -17,6 +17,39 @@ WINNING_CONDITIONS = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] + # rows
 INITIAL_MARKER = ' '
 PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
+WINNING_SCORE = 5
+
+scoreboard = { player: 0, 
+              computer: 0
+}
+
+def scoreboard_counter(winner, scoreboard)
+  if winner == 'Player'
+    scoreboard[:player] += 1
+  elsif winner == 'Computer'
+    scoreboard[:computer] += 1
+  end
+end 
+
+def display_scoreboard(scoreboard)
+  "*** Player score: #{scoreboard[:player]} Computer score: #{scoreboard[:computer]} ***"
+end 
+
+def match_ended?(scoreboard)
+  scoreboard[:player] == WINNING_SCORE || scoreboard[:computer] == WINNING_SCORE
+end
+
+def check_for_grandwinner(scoreboard)
+  if scoreboard[:player] == WINNING_SCORE
+    prompt("You're the GRAND WINNER! Resetting the scoreboard...")
+  elsif scoreboard[:computer] == WINNING_SCORE
+    prompt("Computer is the GRAND WINNER! Resetting the scoreboard...")
+  end
+end
+
+def reset_scoreboard(scoreboard)
+  scoreboard[:player] = 0 && scoreboard[:computer] = 0
+end
 
 def prompt(msg)
   puts "=> #{msg}"
@@ -107,24 +140,44 @@ def detect_winner(brd)
 end
 
 loop do
-  board = initialize_board
-  display_board(board)
+
   loop do
-    player_places_pieces(board)
-    computer_places_piece(board)
-    display_board(board)
-    break if someone_won?(board) || board_full(board)
-  end
+    board = initialize_board
+    
+    loop do
+      display_board(board)
+      prompt display_scoreboard(scoreboard)
+      
+      player_places_pieces(board)
+      computer_places_piece(board)
+      display_board(board)
+      break if someone_won?(board) || board_full(board)
+    end
 
-  if someone_won?(board)
-    prompt "#{detect_winner(board)} won!"
-  else
-    prompt "It's a tie!"
+    if someone_won?(board)
+      prompt "#{detect_winner(board)} won!"
+    else
+      prompt "It's a tie!"
+    end
+    
+    scoreboard_counter(detect_winner(board), scoreboard)
+    
+    display_scoreboard(scoreboard)
+    
+    if match_ended?(scoreboard)
+      check_for_grandwinner(scoreboard)
+      display_scoreboard(scoreboard)
+      break
+    end
   end
-
+  
+  
+  
   prompt "Want to play again? y for yes, n for no:"
   answer = gets.chomp
   break if answer.downcase != 'y'
+  
+  reset_scoreboard(scoreboard)
 end
 
 prompt "Thanks for playing!"
