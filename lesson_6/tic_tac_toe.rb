@@ -111,9 +111,36 @@ def player_places_pieces(brd)
   brd[answer] = PLAYER_MARKER
 end
 
+def defensive_move(brd)
+  WINNING_CONDITIONS.each do |line|
+    if brd.values_at(*line).count(PLAYER_MARKER) == 2
+      return brd.select { |k,v| line.include?(k) && v == INITIAL_MARKER}.keys.first
+    end
+  end
+  nil
+end
+
+def offensive_move(brd)
+  WINNING_CONDITIONS.each do |line|
+    if brd.values_at(*line).count(COMPUTER_MARKER) == 2
+      return brd.select { |k,v| line.include?(k) && v == INITIAL_MARKER}.keys.first
+    end
+  end
+  nil
+end
+
 def computer_places_piece(brd)
-  answer = empty_spaces(brd).sample
-  brd[answer] = COMPUTER_MARKER
+  square = nil
+  
+  if !!defensive_move(brd)
+    square = defensive_move(brd)
+  elsif !!offensive_move(brd)
+    square = offensive_move(brd)
+  else
+    square = empty_spaces(brd).sample
+  end
+  
+  brd[square] = COMPUTER_MARKER
 end
 
 def board_full(brd)
