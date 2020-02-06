@@ -1,32 +1,39 @@
-require 'pry'
-
-board = {1=>'X', 2=> ' ', 3=> ' ', 4=> 'X', 5=> ' ', 6=> ' ', 7=> 'O', 8=> 'O', 9=> ' '}
-WINNING_CONDITIONS = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] + # rows
-                     [[1, 4, 7], [2, 5, 8], [3, 6, 9]] + # cols
-                     [[1, 5, 9], [3, 5, 7]] # diags
-COMPUTER_MARKER = 'O'
-PLAYER_MARKER = 'X'
-INITIAL_MARKER = ' '
-
-def defensive_move(brd)
-  
-  square = WINNING_CONDITIONS.each do |line|
-    if brd.values_at(*line).count(PLAYER_MARKER) == 2
-      return brd.select { |k,v| line.include?(k) && v == INITIAL_MARKER}.keys.first
+def decide_who_goes_first
+  if WHO_FIRST == 'player'
+    'player'
+  elsif WHO_FIRST == 'computer'
+    'computer'
+  elsif WHO_FIRST == 'choose'
+    puts "You get to decide who goes first! Type 1 for player and 2 for computer:"
+    loop do
+      answer = gets.chomp
+      if answer == '1'
+        return 'player'
+      elsif answer == '2'
+        return 'computer'
+      else 
+        puts "That's not a valid choice. Try again."
+      end
     end
   end
-  square
 end
 
-
-def offensive_move(brd)
-  
-  square = WINNING_CONDITIONS.each do |line|
-    if brd.values_at(*line).count(COMPUTER_MARKER) == 2
-      return brd.select { |k,v| line.include?(k) && v == INITIAL_MARKER}.keys.first
-    end
+def move(player, brd)
+  if player == 'player'
+    player_places_pieces(brd)
+  elsif player == 'computer'
+    computer_places_piece(brd)
   end
-  square
 end
 
-p (offensive_move(board))
+def next_player_turn(current_player)
+  if current_player == 'computer'
+    return 'player'
+  elsif player == 'player'
+    return 'computer'
+  end
+end
+
+# determine player 
+# player moves 
+# next player places piece 
