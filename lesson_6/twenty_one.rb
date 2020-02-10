@@ -2,11 +2,10 @@ require 'pry'
 
 WINNING_CONDITION = 21
 
-deck = {'Hearts': ['Ace', 2, 3, 4, 5, 6, 7, 8, 9, 'Jack', 'Queen', 'King'],
-        'Spades': ['Ace', 2, 3, 4, 5, 6, 7, 8, 9, 'Jack', 'Queen', 'King'],
-        'Diamonds': ['Ace', 2, 3, 4, 5, 6, 7, 8, 9, 'Jack', 'Queen', 'King'],
-        'Clubs': ['Ace', 2, 3, 4, 5, 6, 7, 8, 9, 'Jack', 'Queen', 'King'] }
-
+deck = { 'Hearts': ['Ace', 2, 3, 4, 5, 6, 7, 8, 9, 'Jack', 'Queen', 'King'],
+         'Spades': ['Ace', 2, 3, 4, 5, 6, 7, 8, 9, 'Jack', 'Queen', 'King'],
+         'Diamonds': ['Ace', 2, 3, 4, 5, 6, 7, 8, 9, 'Jack', 'Queen', 'King'],
+         'Clubs': ['Ace', 2, 3, 4, 5, 6, 7, 8, 9, 'Jack', 'Queen', 'King'] }
 
 def deal_card(deck, hand)
   suit = deck.keys.sample
@@ -23,47 +22,49 @@ end
 def display_p_hand(p_hand)
   puts "\nYour cards: #{joinor(p_hand)}."
   puts "Total: #{calculate_total(p_hand)}"
-end 
+end
 
 def display_d_hand(d_hand)
   puts "The dealer has #{d_hand[0][1]} and an unknown card."
 end
 
-def joinor(arr, dev=', ', word='and ')
-    values = []
-    arr.each do |sub_arr|
-      values << sub_arr.last
-    end
-      return values.join(" #{word}")
-end
+def joinor(arr, dev=', ', word=' and ')
+  values = []
+  arr.each do |sub_arr|
+    values << sub_arr.last
+  end
 
-
-def calculate_total(hand)
-total = 0
-# calculate total
-hand.each do |card|
-  if card.last == 'King'
-      total += 10  
-  elsif card.last == 'Queen'
-      total += 10 
-  elsif card.last == 'Jack'
-      total += 10
-  elsif card.last == 'Ace'
-      total += 11
-  else
-      total += card.last
+  if values.length == 2
+    return values.join(word.to_s)
+  elsif values.length > 2
+    return values[0...-1].join(dev) + word.to_s + values.last.to_s
   end
 end
-# calculate number of aces 
-hand.flatten.count('Ace').times do
-  total -= 10 if total > WINNING_CONDITION
-end
-# return total  
-total
+
+def calculate_total(hand)
+  total = 0
+  # calculate total
+  hand.each do |card|
+    value = card.last
+    total += if value == 'Ace'
+               11
+             elsif value.to_i == 0
+               10
+             else
+               value
+             end
+  end
+
+  # calculate number of aces
+  hand.flatten.count('Ace').times do
+    total -= 10 if total > WINNING_CONDITION
+  end
+  # return total
+  total
 end
 
 def hit_or_stick_player(deck, players_hand)
-  loop do 
+  loop do
     display_p_hand(players_hand)
     sleep(2)
     puts "\nHit or stick?"
@@ -71,21 +72,20 @@ def hit_or_stick_player(deck, players_hand)
     break if answer.downcase == "stick"
     if answer.downcase == "hit"
       deal_card(deck, players_hand)
-    break if !!busted?(players_hand)
+      break if !!busted?(players_hand)
     else
       puts "You need to select a valid option"
     end
   end
 end
 
-
 def hit_or_stick_dealer(deck, dealers_hand)
-  loop do 
+  loop do
     if calculate_total(dealers_hand) < 17
       deal_card(deck, dealers_hand)
       sleep(1)
       puts "\nDealer hits!"
-    break if !!busted?(dealers_hand)
+      break if !!busted?(dealers_hand)
     elsif calculate_total(dealers_hand) >= 17
       sleep(1)
       puts "\nDealer sticks!"
@@ -115,51 +115,48 @@ def display_results(p_hand, d_hand)
   puts "Dealer's Hand: #{calculate_total(d_hand)}"
 end
 
+loop do
+  sleep(1)
+  system 'clear'
 
-loop do 
-sleep(1)
-system 'clear'
+  players_hand = []
+  dealers_hand = []
 
-players_hand = []
-dealers_hand = []
-  
-deal_intitial_cards(deck, players_hand, dealers_hand)
+  deal_intitial_cards(deck, players_hand, dealers_hand)
 
-display_d_hand(dealers_hand)  
+  display_d_hand(dealers_hand)
 
   loop do
-    puts "\nPlayer's turn:" 
+    puts "\nPlayer's turn:"
     hit_or_stick_player(deck, players_hand)
     if !!busted?(players_hand)
-      puts "\nBusted! Your hand was #{calculate_total(players_hand)}. Dealer Wins!"
-    break
+      puts "\nBusted!"
+      puts "Your hand: #{calculate_total(players_hand)}. Dealer Wins!"
+      break
     end
-  
     puts "\nDealer's turn:"
     sleep(2)
     hit_or_stick_dealer(deck, dealers_hand)
     if !!busted?(dealers_hand)
-      puts "\nDealer Busted! Dealer's hand was #{calculate_total(dealers_hand)}. Player Wins!" 
-    break
+      puts "\nDealer Busted!"
+      puts "\nDealer's hand was #{calculate_total(dealers_hand)}. Player Wins!"
+      break
     end
-  
-  compare_cards(players_hand, dealers_hand)
-  
-  sleep(2)
 
-  display_results(players_hand, dealers_hand)
-  
-  break
+    compare_cards(players_hand, dealers_hand)
+    sleep(2)
+    display_results(players_hand, dealers_hand)
+    break
   end
-  
-sleep(2)
-puts "\nWould you like to play again? y for yes, n for no."
-answer = gets.chomp
-if answer.downcase == 'n'
-break
-end
+
+  sleep(2)
+  puts "\nWould you like to play again? y for yes, n for no."
+  answer = gets.chomp
+  if answer.downcase == 'n'
+    break
+  end
 end
 system 'clear'
-sleep(2)
-puts "Thanks for playing!"
+sleep(1)
+puts "Thanks for playing Twenty One!"
 sleep(2)
