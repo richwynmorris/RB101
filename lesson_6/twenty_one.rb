@@ -1,6 +1,7 @@
 require 'pry'
 
 WINNING_CONDITION = 21
+DEALERS_LIMIT = 17
 
 deck = { 'Hearts': ['Ace', 2, 3, 4, 5, 6, 7, 8, 9, 'Jack', 'Queen', 'King'],
          'Spades': ['Ace', 2, 3, 4, 5, 6, 7, 8, 9, 'Jack', 'Queen', 'King'],
@@ -81,12 +82,12 @@ end
 
 def hit_or_stick_dealer(deck, dealers_hand)
   loop do
-    if calculate_total(dealers_hand) < 17
+    if calculate_total(dealers_hand) < DEALERS_LIMIT
       deal_card(deck, dealers_hand)
       sleep(1)
       puts "\nDealer hits!"
       break if !!busted?(dealers_hand)
-    elsif calculate_total(dealers_hand) >= 17
+    elsif calculate_total(dealers_hand) >= DEALERS_LIMIT
       sleep(1)
       puts "\nDealer sticks!"
       break
