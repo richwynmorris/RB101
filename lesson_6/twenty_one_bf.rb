@@ -2,6 +2,7 @@ require 'pry'
 
 WINNING_CONDITION = 21
 DEALERS_LIMIT = 17
+ROUNDS = 5
 
 deck = { 'Hearts': ['Ace', 2, 3, 4, 5, 6, 7, 8, 9, 'Jack', 'Queen', 'King'],
          'Spades': ['Ace', 2, 3, 4, 5, 6, 7, 8, 9, 'Jack', 'Queen', 'King'],
@@ -68,13 +69,13 @@ def players_turn(deck, players_hand, p_total)
   loop do
     display_p_hand(players_hand)
     sleep(2)
-    puts "\nHit or stick?"
+    puts "\nHit or stick? h for hit, s for stick."
     answer = gets.chomp
-    deal_card(deck, players_hand) if answer.downcase == "hit"
+    deal_card(deck, players_hand) if answer.downcase == 'h'
     p_total = calculate_total(players_hand)
-    break if answer == "stick" || busted?(p_total)
+    break if answer == 's' || busted?(p_total)
   end
-  
+
   if busted?(p_total)
     puts "\nBusted!"
     puts "Your hand: #{p_total}. Dealer Wins!"
@@ -91,7 +92,7 @@ def dealers_turn(deck, dealers_hand, d_total)
     sleep(1)
     puts "\nDealer hits!"
   end
-  
+
   if busted?(d_total)
     sleep(1)
     puts "\nDealer busted! You won!"
@@ -117,7 +118,7 @@ def result(p_total, d_total)
   elsif d_total > p_total
     :dealer
   end
-end 
+end
 
 def display_results(p_total, d_total)
   puts "\nPlayer's Hand: #{p_total}"
@@ -126,7 +127,7 @@ end
 
 def display_winner(p_total, d_total)
   winner = result(p_total, d_total)
-  puts "\nThe winner of this round is #{winner.to_s}." 
+  puts "\nThe winner of this round is #{winner}."
 end
 
 def display_scoreboard(scoreboard)
@@ -143,32 +144,41 @@ def update_scoreboard(scoreboard, p_total, d_total)
 end
 
 def game_ended(scoreboard)
-  scoreboard.any? {|k,v| v == 5}
+  scoreboard.any? { |_, v| v == ROUNDS }
 end
 
 def display_grandwinner(scoreboard)
-  if scoreboard[:player] == 5
+  if scoreboard[:player] == ROUNDS
     puts "\nPLAYER is the GRANDWINNER!"
-  elsif scoreboard[:dealer] == 5
+  elsif scoreboard[:dealer] == ROUNDS
     puts "\nDEALER is the GRANDWINNER!"
-  elsif scoreboard[:tie] == 5
+  elsif scoreboard[:tie] == ROUNDS
     puts "\nIT'S A DRAW! TIE FOR GRANDWINNER"
   end
 end
 
 def intro
-  puts "INTRO RULES"
+  puts "Welcome to Twenty One!"
+  puts "The Rules:"
+  puts "The objective of twenty one is to get the highest collective value of "
+  puts "cards without going over the number of twenty one."
+  puts "Jack, Queen and King are equal to 10 and Ace can be either 1 or 11."
+  puts "You, and the dealer, will be dealt 2 cards at the start of the round."
+  puts "You can either 'stick' with your current total or 'hit' to add another "
+  puts "card. Once you 'stick' you cannot add another card. It's then the
+ dealers turn to stick or hit."
+  puts "But, if your total goes over 21, you 'bust' and lose the game."
+  puts "Once both players have stuck with their hands,"
+  puts "both sides reveal their cards. The highest total is the round winner."
+  puts "The first to #{ROUNDS} rounds is the GRANDWINNER."
 end
 
 loop do
   intro
-  sleep(1)
+  sleep(30)
   system 'clear'
-  
-  scoreboard = {:player => 0,
-                :dealer => 0,
-                :tie => 0
-  }
+
+  scoreboard = { player: 0, dealer: 0, tie: 0 }
 
   loop do
     players_hand = []
@@ -176,24 +186,23 @@ loop do
 
     deal_intitial_cards(deck, players_hand, dealers_hand)
     players_total = calculate_total(players_hand)
-    dealers_total = calculate_total(dealers_hand)
     display_d_hand(dealers_hand)
-    
+
     # Players turn
     puts "\nPlayer's turn:"
     players_turn(deck, players_hand, players_total)
     players_total = calculate_total(players_hand)
-    
+
     # Dealers turn
     if !busted?(players_total)
-        dealers_total = calculate_total(dealers_hand)
-        puts "\nDealer's turn:"
-        sleep(2)
-        dealers_turn(deck, dealers_hand, dealers_total)
+      dealers_total = calculate_total(dealers_hand)
+      puts "\nDealer's turn:"
+      sleep(2)
+      dealers_turn(deck, dealers_hand, dealers_total)
     end
     dealers_total = calculate_total(dealers_hand)
+
     # update results
-    
     result(players_total, dealers_total)
     sleep(2)
     system 'clear'
