@@ -2,7 +2,7 @@ require 'pry'
 
 WINNING_CONDITION = 21
 DEALERS_LIMIT = 17
-ROUNDS = 5
+ROUNDS = 2
 
 deck = { 'Hearts': ['Ace', 2, 3, 4, 5, 6, 7, 8, 9, 'Jack', 'Queen', 'King'],
          'Spades': ['Ace', 2, 3, 4, 5, 6, 7, 8, 9, 'Jack', 'Queen', 'King'],
@@ -10,8 +10,15 @@ deck = { 'Hearts': ['Ace', 2, 3, 4, 5, 6, 7, 8, 9, 'Jack', 'Queen', 'King'],
          'Clubs': ['Ace', 2, 3, 4, 5, 6, 7, 8, 9, 'Jack', 'Queen', 'King'] }
 
 def deal_card(deck, hand)
+  deck.reject! { |_, v| v == [] }
   suit = deck.keys.sample
-  hand << [suit, deck[suit].sample]
+  hand << [suit, deck[suit].delete(deck[suit].sample)]
+end
+
+def refill_deck!(deck)
+  deck.each do |suit, _|
+    deck[suit] = ['Ace', 2, 3, 4, 5, 6, 7, 8, 9, 'Jack', 'Queen', 'King']
+  end
 end
 
 def deal_intitial_cards(deck, p_hand, d_hand)
@@ -65,15 +72,35 @@ def calculate_total(hand)
   total
 end
 
-def players_turn(deck, players_hand, p_total)
+def valid_player_choice?(p_hand)
   loop do
-    display_p_hand(players_hand)
-    sleep(2)
+    display_p_hand(p_hand)
     puts "\nHit or stick? h for hit, s for stick."
     answer = gets.chomp
-    deal_card(deck, players_hand) if answer.downcase == 'h'
-    p_total = calculate_total(players_hand)
-    break if answer == 's' || busted?(p_total)
+    if answer.downcase == 'h'
+      return 'hit'
+    elsif answer.downcase == 's'
+      return 'stick'
+    else
+      puts "That's not a valid answer. Try again."
+      sleep(2)
+      system 'clear'
+    end
+  end
+end
+
+def update_player_total(p_hand)
+  calculate_total(p_hand)
+end
+
+def players_turn(deck, players_hand, p_total)
+  loop do
+    decision = valid_player_choice?(players_hand)
+    if decision == 'hit'
+      deal_card(deck, players_hand)
+      p_total = update_player_total(players_hand, p_total)
+    end
+    break if decision == 'stick' || busted?(p_total)
   end
 
   if busted?(p_total)
@@ -84,15 +111,15 @@ def players_turn(deck, players_hand, p_total)
   end
 end
 
-def dealers_turn(deck, dealers_hand, d_total)
+def dealers_turn(deck, dealers_hand)
+  d_total = calculate_total(dealers_hand)
+  puts "\nDealer's turn:"
   loop do
     break if d_total > DEALERS_LIMIT || busted?(d_total)
     deal_card(deck, dealers_hand)
     d_total = calculate_total(dealers_hand)
-    sleep(1)
     puts "\nDealer hits!"
   end
-
   if busted?(d_total)
     sleep(1)
     puts "\nDealer busted! You won!"
@@ -157,27 +184,44 @@ def display_grandwinner(scoreboard)
   end
 end
 
+def instructions
+  <<-text
+Welcome to Twenty One!
+
+** ENTER 'S' TO SKIP RULES **
+
+The Rules:
+The objective of twenty one is to get the highest collective value of
+cards without going over the number of twenty one.
+Jack, Queen and King are equal to 10 and Ace can be either 1 or 11.
+You, and the dealer, will be dealt 2 cards at the start of the round.
+You can either 'stick' with your current total or 'hit' to add another
+card. Once you 'stick' you cannot add another card. It's then the dealers
+turn to stick or hit.
+But, if your total goes over 21, you 'bust' and lose the game.
+Once both players have stuck with their hands,
+both sides reveal their cards. The highest total is the round winner.
+The first to #{ROUNDS} rounds is the GRANDWINNER.
+Ready? Let's get started!
+
+** ENTER 'P' to play! **
+text
+end
+
 def intro
-  puts "Welcome to Twenty One!"
-  puts "The Rules:"
-  puts "The objective of twenty one is to get the highest collective value of "
-  puts "cards without going over the number of twenty one."
-  puts "Jack, Queen and King are equal to 10 and Ace can be either 1 or 11."
-  puts "You, and the dealer, will be dealt 2 cards at the start of the round."
-  puts "You can either 'stick' with your current total or 'hit' to add another "
-  puts "card. Once you 'stick' you cannot add another card. It's then the
- dealers turn to stick or hit."
-  puts "But, if your total goes over 21, you 'bust' and lose the game."
-  puts "Once both players have stuck with their hands,"
-  puts "both sides reveal their cards. The highest total is the round winner."
-  puts "The first to #{ROUNDS} rounds is the GRANDWINNER."
+  loop do
+    puts instructions
+    answer = gets.chomp
+    if answer.downcase == 's' || answer.downcase == 'p'
+      break
+    end
+  end
 end
 
 loop do
   intro
-  sleep(30)
   system 'clear'
-
+  refill_deck!(deck)
   scoreboard = { player: 0, dealer: 0, tie: 0 }
 
   loop do
@@ -187,7 +231,6 @@ loop do
     deal_intitial_cards(deck, players_hand, dealers_hand)
     players_total = calculate_total(players_hand)
     display_d_hand(dealers_hand)
-
     # Players turn
     puts "\nPlayer's turn:"
     players_turn(deck, players_hand, players_total)
@@ -195,15 +238,11 @@ loop do
 
     # Dealers turn
     if !busted?(players_total)
-      dealers_total = calculate_total(dealers_hand)
-      puts "\nDealer's turn:"
-      sleep(2)
-      dealers_turn(deck, dealers_hand, dealers_total)
+      dealers_turn(deck, dealers_hand)
     end
     dealers_total = calculate_total(dealers_hand)
 
     # update results
-    result(players_total, dealers_total)
     sleep(2)
     system 'clear'
     display_results(players_total, dealers_total)
@@ -221,7 +260,10 @@ loop do
   sleep(2)
   puts "\nWould you like to play again? y for yes, n for no."
   answer = gets.chomp
-  if answer.downcase == 'n'
+  if answer.downcase == 'y' || answer.downcase == 'yes'
+    system 'clear'
+  elsif answer.downcase == 'n' || answer.downcase == 'no'
+    system 'clear'
     break
   end
 end
