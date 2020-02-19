@@ -2,7 +2,7 @@ require 'pry'
 
 WINNING_CONDITION = 21
 DEALERS_LIMIT = 17
-ROUNDS = 2
+ROUNDS = 5
 
 deck = { 'Hearts': ['Ace', 2, 3, 4, 5, 6, 7, 8, 9, 'Jack', 'Queen', 'King'],
          'Spades': ['Ace', 2, 3, 4, 5, 6, 7, 8, 9, 'Jack', 'Queen', 'King'],
@@ -12,7 +12,17 @@ deck = { 'Hearts': ['Ace', 2, 3, 4, 5, 6, 7, 8, 9, 'Jack', 'Queen', 'King'],
 def deal_card(deck, hand)
   deck.reject! { |_, v| v == [] }
   suit = deck.keys.sample
-  hand << [suit, deck[suit].delete(deck[suit].sample)]
+  card = [suit, deck[suit].sample]
+  hand << card
+  remove_card_from_deck(card, deck)
+end
+
+def remove_card_from_deck(c, d)
+  d.each do |suit , set|
+    if suit == c[0]
+      set.delete_if{|card| card == c[1]}
+    end
+  end
 end
 
 def refill_deck!(deck)
@@ -98,7 +108,7 @@ def players_turn(deck, players_hand, p_total)
     decision = valid_player_choice?(players_hand)
     if decision == 'hit'
       deal_card(deck, players_hand)
-      p_total = update_player_total(players_hand, p_total)
+      p_total = update_player_total(players_hand)
     end
     break if decision == 'stick' || busted?(p_total)
   end
